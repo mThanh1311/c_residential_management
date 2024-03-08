@@ -12,12 +12,22 @@
 * Input: data of struct Member 
 * Output: information of member
 */
-void getInfor(Member* member){
+void display(Member* member){
 	printf("UID: %s\n", member->uid);
 	printf("Room Number: %s\n", member->roomNumber);
 	printf("Name: %s\n", member->name);
 	printf("License Plate: %s\n", member->licensePlate);
 	printf("\n");
+}
+
+
+void printAllMembers(MemberNode* list) {
+	MemberNode* p = list;
+	while (p != NULL) {
+		display(&(p->data));
+		p = p->next;
+	}
+	printf("\n----------------------------------------\n");
 }
 
 
@@ -32,6 +42,24 @@ MemberNode* createMemberNode(Member member) {
 	newNode->next = NULL;
 	return newNode;
 }
+
+/*
+* Description: Enter the information of member  
+* Input: data of struct Member
+* Output: member
+*/
+Member* inputInfor(Member* member) {
+	printf("\nUID: "); 
+	fgets(member->uid, sizeof(member->uid), stdin);
+	printf("\nRoom number: "); 
+	fgets(member->roomNumber, sizeof(member->roomNumber), stdin);
+	printf("\nName: "); 
+	fgets(member->name, sizeof(member->name), stdin);
+	printf("\nLicense plate: "); 
+	fgets(member->licensePlate, sizeof(member->licensePlate), stdin);
+	return member;
+}
+
 
 /*
 * Description: Add Record new member information at the end of node
@@ -54,16 +82,6 @@ void addNodeMember(MemberNode** list, Member member) {
 		}
 		p->next = temp;				// change it next member point to address of new node have just create	
 	}
-}
-
-
-void printAllMembers(MemberNode* list) {
-    MemberNode* currentNode = list;
-    while (currentNode != NULL) {
-		getInfor(&(currentNode->data));
-        currentNode = currentNode->next;
-    }
-	printf("\n----------------------------------------\n");
 }
 
 /*
@@ -105,7 +123,7 @@ void deleteNodeMember(MemberNode** list, const char* uidDel) {
 * Description: Edit information of member
 * Input: List, uid of residential which want to edit
 * Output: List
-* Status: completing.... (52%)
+* Status: completing.... (85%)
 */
 void editNodeMember(MemberNode** list, const char* uidEdit) {
 	
@@ -114,12 +132,85 @@ void editNodeMember(MemberNode** list, const char* uidEdit) {
 	// Use "for" loop to browse through all node 
 	for (*list; p != NULL; p = p->next) {
 		if (strcmp(p->data.uid, uidEdit) == 0) {
-			printf("Information's member : \n");
-			getInfor(&p->data);
 
 			// Bo sung doan xu ly thay doi sau
+			printf("What is your changes ?\n");
+			inputInfor(&p->data);
+
+			printf("\nInformation's member after change: \n");
+			display(&p->data);
+			printAllMembers(p);
 		}
 	}
+
+	// Not found this member information
+	printf("Member with UID %s not found.\n", uidEdit);
+}
+
+/*
+* Description: Searching information of member by using UID  
+* Input: Member Node, uid
+* Output: corresponding information or not found this information
+*/
+int searchByUID(MemberNode* list, const char* uidMem) {
+
+	MemberNode* p = list;
+
+	// Browse through all node for list MembeNode 
+	// Comparing the uid of member data with uid which want to find
+	for (p; p != NULL; p = p->next) {
+		// True
+		if (strcmp(p->data.uid, uidMem) == 0) {
+			display(&p->data);
+			return 1;
+		}
+	}
+
+	//False
+	return 0;
+}
+
+/*
+* Description: Searching information of member by using Licnese plate
+* Input: Member Node, license plate information
+* Output: corresponding information or not found this information
+*/
+int searchByLicenseplate(MemberNode* list, const char* lcpMem) {
+
+	MemberNode* p = list;
+
+	// Browse through all node for list MembeNode 
+	// Comparing the license plate of member data with license plate which want to find
+	for (p; p != NULL; p = p->next) {
+		// True
+		if (strcmp(p->data.licensePlate, lcpMem) == 0) {
+			display(&p->data);
+			return 1;
+		}
+	}
+
+	// False
+	return 0;
+}
+
+/*
+* Description: Using function pointer to shorten function calls
+* Input: Search function based on one information, list, information we need to find
+* Output: display this data or print not found
+*/
+void searchMember(int (*searchMember)(MemberNode*, const char*), MemberNode* list, const char* info) {
+	MemberNode* p = list;
+
+	while (p != NULL) {
+		if ((searchMember(p, info)) == 1) {
+			return;
+		}
+		else {
+			p = p->next;
+		}
+	}
+	// If not found
+	printf("\nWe cannot found this information! Please try again\n");
 }
 
 int main() {
@@ -141,8 +232,7 @@ int main() {
 	addNodeMember(&list, member6);
 
 
-	printAllMembers(list);
-	editNodeMember(&list, "UID001");
+	searchMember(searchByUID, list, "UID003");
 
 	return 0;
 }
